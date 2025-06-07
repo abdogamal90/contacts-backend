@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const contactRoutes = require('./routes/contactRoutes');
 const dotenv = require('dotenv').config();
+const authToken = require('./middleware/loginMiddleware');
+const loginRoutes = require('./routes/loginRoutes');
 
 const app = express();
 
@@ -17,10 +19,11 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/verify',loginRoutes);
 // Routes
-app.use('/api/contacts', contactRoutes);
+app.use('/api/contacts',authToken, contactRoutes);
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`localhost:${PORT}`);
 });

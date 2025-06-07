@@ -1,7 +1,7 @@
 import Contact from '../models/Contact.js';
 export const getContacts = async (req, res) => {
 
-  const page = 1;
+  const page = parseInt(req.query.page) || 1;
   const limit = 5;
   const offset = (page - 1) * limit;
 
@@ -11,7 +11,7 @@ export const getContacts = async (req, res) => {
     const totalPages = Math.ceil(totalContacts / limit);
     return res.status(200).json({ totalContacts, page, totalPages, contacts });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json(err.message);
   }
 };
 
