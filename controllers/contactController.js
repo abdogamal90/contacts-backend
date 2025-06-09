@@ -9,7 +9,7 @@ export const getContacts = async (req, res) => {
   if (req.query.phone) filters.phone = new RegExp(req.query.phone, 'i');
   if (req.query.address) filters.address = new RegExp(req.query.address, 'i');
   try {
-    const contacts = await Contact.find({ ...filters }).skip(offset).limit(limit).exec();
+    const contacts = await Contact.find({ ...filters }).lean().skip(offset).limit(limit).exec();
     const normalizedContacts = contacts.map(contact => ({
       ...contact,
       _id: contact._id.toString()
