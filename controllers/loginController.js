@@ -18,10 +18,10 @@ export const login = (req,res)=>{
       return res.status(401).json({error : 'please enter correct credentials'})
     }
 
-    const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, {expiresIn: '1h',});
+    const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ token });
-  } catch(err){
-    res.status(500).json(err.message)
+  } catch (err) {
+    res.status(500).json(err.message);
   }
 }
 
