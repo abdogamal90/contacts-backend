@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const users = [
-  { username: 'user1', password: 'user1' },
-  { username: 'user2', password: 'user2' },
+  { username: 'user1', password: 'user1', role:"admin" },
+  { username: 'user2', password: 'user2', role:"user" },
 ];
 
 export const login = (req,res)=>{

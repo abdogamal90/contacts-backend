@@ -33,11 +33,12 @@ export const createContact = async (req, res) => {
     await newContact.save();
     res.status(201).json(newContact);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    if (name && phone && address) {
+      return res.status(400).json({ error: 'Invalid input data' });
+    }
   }
 };
 
-// edit contact
 export const updateContact = async (req, res) => {
   const { id } = req.params;
   const { name, phone, address, notes } = req.body;
