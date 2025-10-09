@@ -1,5 +1,5 @@
 import Contact from '../models/Contact.js';
-export const getContacts = async (req, res) => {
+export const getContacts = async (req, res, next) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = 5;
@@ -18,45 +18,43 @@ export const getContacts = async (req, res) => {
     const totalPages = Math.ceil(totalContacts / limit);
     return res.status(200).json({ totalContacts, page, totalPages, contacts: normalizedContacts });
   } catch (err) {
-    res.status(500).json(err.message);
+    next(err);
   }
 };
 
-export const createContact = async (req, res) => {
+export const createContact = async (req, res, next) => {
   const { name, phone, address, notes } = req.body;
-  if (!name || !phone || !address) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
 
   try {
     const newContact = new Contact({ name, phone, address, notes });
     await newContact.save();
     res.status(201).json(newContact);
   } catch (err) {
-    if (name && phone && address) {
-      return res.status(400).json({ error: 'Invalid input data' });
-    }
+    // Validation or duplicate errors can be handled here, but unexpected errors go to next()
+    next(err);
   }
 };
 
-export const updateContact = async (req, res) => {
+export const updateContact = async (req, res, next) => {
   const { id } = req.params;
   const { name, phone, address, notes } = req.body;
 
   try {
     const updated = await Contact.findByIdAndUpdate(id, { name, phone, address, notes }, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Contact not found' });
     res.json(updated);
   } catch (err) {
-    res.status(500).json(err.message);
+    next(err);
   }
 };
 
-export const deleteContact = async (req, res) => {
+export const deleteContact = async (req, res, next) => {
   const { id } = req.params;
   try {
-    await Contact.findByIdAndDelete(id);
+    const deleted = await Contact.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ error: 'Contact not found' });
     res.json({ message: 'Contact deleted' });
   } catch (err) {
-    res.status(500).json(err.message);
+    next(err);
   }
 };
