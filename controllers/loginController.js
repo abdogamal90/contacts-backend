@@ -5,7 +5,7 @@ dotenv.config();
 const users = [
   { username: 'user1', password: 'user1', role:"admin" },
   { username: 'user2', password: 'user2', role:"user" },
-  {username:'user3', password:'user3', role:"admin" },
+  { username:'user3', password:'user3', role:"admin" },
 ];
 
 export const login = (req,res)=>{
