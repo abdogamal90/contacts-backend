@@ -1,28 +1,48 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
 
-const users = [
-  { username: 'user1', password: 'user1', role:"admin" },
-  { username: 'user2', password: 'user2', role:"user" },
-  { username:'user3', password:'user3', role:"admin" },
-];
-
-export const login = (req,res)=>{
-
-  try{
-    const data = req.body;
-
-    const user = users.find(u => u.username == data.username && u.password == data.password)
-
-    if(!user){
-      return res.status(401).json({error : 'please enter correct credentials'})
+// Register a new user
+const register = async (req, res) => {
+  try {
+    const { username, password, email, role } = req.body;
+    if (!username || !password || !email) {
+      return res.status(400).json({ error: 'username, password, and email are required' });
     }
 
-    const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token });
+    const existing = await User.findOne({ username });
+    if (existing) return res.status(409).json({ error: 'username already exists' });
+
+    const hashed = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashed, email, role });
+    await user.save();
+    res.status(201).json({ success: true, message: 'User registered' });
   } catch (err) {
-    res.status(500).json(err.message);
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
-}
+};
+
+// Login existing user
+const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'username and password required' });
+
+    const user = await User.findOne({ username });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const payload = { id: user._id, username: user.username, role: user.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+module.exports = { register, login };
 
