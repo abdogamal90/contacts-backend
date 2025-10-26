@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
-const loginController = require('../controllers/loginController');
+const authController = require('../controllers/AuthController');
 
 // register
 router.post(
@@ -12,7 +12,7 @@ router.post(
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 		next();
 	},
-	loginController.register
+	authController.register
 );
 
 // login
@@ -24,7 +24,7 @@ router.post(
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 		next();
 	},
-	loginController.login
+	authController.login
 );
 
 module.exports = router;

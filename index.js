@@ -3,6 +3,7 @@ const cors = require('cors');
 const contactRoutes = require('./routes/contactRoutes');
 const dotenv = require('dotenv').config();
 const loginRoutes = require('./routes/loginRoutes');
+const userRoutes = require('./routes/userRoutes');
 const {verifyToken, rbac, authToken} = require('./middleware/loginMiddleware');
 const socketIo = require('socket.io');
 const db = require('./db');
@@ -61,7 +62,17 @@ app.use(errorHandler);
 // Routes
 app.use('/api/auth', loginRoutes);
 app.use('/api/contacts',verifyToken, contactRoutes);
+// Middleware
+app.use(cors());
+app.use(express.json());
 
+// Routes
+app.use('/api/auth', loginRoutes);
+app.use('/api/contacts', verifyToken, contactRoutes);
+app.use('/api/user', verifyToken, userRoutes);
+
+// Error-handling middleware (must come after routes)
+app.use(errorHandler);
 
 
 // Start the server

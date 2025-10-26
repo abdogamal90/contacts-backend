@@ -5,7 +5,7 @@ const User = require('../models/User');
 // Register a new user
 const register = async (req, res) => {
   try {
-    const { username, password, email, role } = req.body;
+    const { username, password, email } = req.body;
     if (!username || !password || !email) {
       return res.status(400).json({ error: 'username, password, and email are required' });
     }
@@ -14,7 +14,7 @@ const register = async (req, res) => {
     if (existing) return res.status(409).json({ error: 'username already exists' });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashed, email, role });
+    const user = new User({ username, password: hashed, email, role: 'user' });
     await user.save();
     res.status(201).json({ success: true, message: 'User registered' });
   } catch (err) {
@@ -34,6 +34,10 @@ const login = async (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured');
+    }
 
     const payload = { id: user._id, username: user.username, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
