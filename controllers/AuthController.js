@@ -12,13 +12,13 @@ const register = async (req, res) => {
 
     const existing = await User.findOne({ username });
     if (existing) return res.status(409).json({ error: 'username already exists' });
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) return res.status(409).json({ error: 'email already in use' });
 
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashed, email, role: 'user' });
-    await user.save();
-    res.status(201).json({ success: true, message: 'User registered' });
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -35,15 +35,11 @@ const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not configured');
-    }
-
     const payload = { id: user._id, username: user.username, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 };

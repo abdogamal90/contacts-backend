@@ -26,9 +26,23 @@ exports.updateUsername = async (req, res, next) => {
       { new: true, runValidators: true }
     ).select('-password');
     if (!user) {
+      // Check if user exists first
+      const currentUser = await User.findById(req.userId);
+      if (!currentUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      // If user exists but update failed, username must equal current username
+      if (currentUser.username === username) {
+        // Username unchanged, return current user
+        return res.json({ ...currentUser.toObject(), password: undefined });
+      }
+      // Otherwise, check if username taken by another user
       const exists = await User.findOne({ username });
-      if (exists) return res.status(409).json({ error: 'Username already taken' });
-      return res.status(404).json({ error: 'User not found' });
+      if (exists) {
+        return res.status(409).json({ error: 'Username already taken' });
+      }
+      // Shouldn't reach here, but handle gracefully
+      return res.status(500).json({ error: 'Update failed' });
     }
     res.json(user);
   } catch (err) {

@@ -8,7 +8,7 @@ const { body, validationResult } = require('express-validator');
 const contactValidation = [
   body('name').isString().notEmpty().withMessage('Name is required'),
   // replace the existing numeric‐only check with a mobile‐phone validator
-  body('phone').isMobilePhone('any', { strictMode: false }).notEmpty().withMessage('Phone is required'),
+  body('phone').notEmpty().withMessage('Phone is required').isMobilePhone('any', { strictMode: false }).withMessage('Invalid phone number'),
   body('address').isString().notEmpty().withMessage('Address is required'),
   body('notes').optional().isString(),
   (req, res, next) => {

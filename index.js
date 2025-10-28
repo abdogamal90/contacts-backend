@@ -9,6 +9,10 @@ const socketIo = require('socket.io');
 const db = require('./db');
 const errorHandler = require('./middleware/errorHandler');
 
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is not configured');
+}
+
 
 const app = express();
 db();
@@ -52,16 +56,6 @@ io.on('connection', (socket) => {
 
 
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Error-handling middleware (must come after routes)
-app.use(errorHandler);
-
-// Routes
-app.use('/api/auth', loginRoutes);
-app.use('/api/contacts',verifyToken, contactRoutes);
 // Middleware
 app.use(cors());
 app.use(express.json());
