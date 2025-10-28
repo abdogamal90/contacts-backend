@@ -17,6 +17,18 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 db();
 
+// Ensure Contact indexes on startup
+const Contact = require('./models/Contact');
+(async () => {
+  try {
+    await Contact.syncIndexes(); // drops obsolete indexes and creates the defined ones
+    console.log('Contact indexes synced');
+  } catch (e) {
+    console.error('Failed to sync Contact indexes:', e.message);
+    // Optionally: process.exit(1) if you want to fail fast on index errors
+  }
+})();
+
 // Initialize Socket.io
 const server = require('http').createServer(app);
 const io = socketIo(server, {

@@ -12,7 +12,7 @@ module.exports = (err, req, res, next) => {
     status = 409;
     const field = Object.keys(err.keyPattern || {})[0];
     const value = err.keyValue ? err.keyValue[field] : 'this value';
-    message = `A contact with ${field} "${value}" already exists.`;
+    message = `A record with ${field} "${value}" already exists.`;
   }
 
   // Handle Mongoose validation errors

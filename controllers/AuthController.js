@@ -6,9 +6,21 @@ const User = require('../models/User');
 const register = async (req, res) => {
   try {
     const { username, password, email } = req.body;
-    if (!username || !password || !email) {
-      return res.status(400).json({ error: 'username, password, and email are required' });
+
+    if (!username){
+      return res.status(400).json({ error: 'username is required' });
     }
+
+    if (!password) {
+      return res.status(400).json({ error: 'password is required' });
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'email is required' });
+    }
+
+    console.log(username, email);
+    console.log(await User.find({}));
 
     const existing = await User.findOne({ username });
     if (existing) return res.status(409).json({ error: 'username already exists' });
@@ -17,6 +29,9 @@ const register = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashed, email, role: 'user' });
+    console.log(user);
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error('Registration error:', err.message);
     res.status(500).json({ error: 'Server error' });
