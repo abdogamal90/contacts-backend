@@ -1,21 +1,28 @@
 const jwt = require('jsonwebtoken');
 
 function verifyToken(req, res, next) {
-  const header = req.header('Authorization');
-  if (!header || !header.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Access denied. No token provided.' });
-  }
-  const token = header.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Access denied' });
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Attach useful user info to the request
+
+    // Preferred unified shape
+    req.user = {
+      id: decoded.id,
+      username: decoded.username,
+      role: decoded.role,
+    };
+
+    // Backward compatibility during transition
     req.userId = decoded.id;
-    req.username = decoded.username;
     req.role = decoded.role;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
+
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 

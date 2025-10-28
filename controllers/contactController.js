@@ -5,15 +5,15 @@ export const getContacts = async (req, res, next) => {
   const limit = 5;
   const offset = (page - 1) * limit;
   const filters = {};
-  console.log(req.query.userId)
 
-  const isAdmin = req.role === 'admin';
+  const isAdmin = req.user?.role === 'admin';
 
   if (isAdmin) {
-    if (req.query.userId) filters.owner = req.query.userId;
+    if (req.query.user.id) filters.owner = filters.owner = req.query.user.id;
   } else {
-    filters.owner = req.userId;
+    filters.owner = req.user.id;
   }
+
   if (req.query.name) filters.name = new RegExp(req.query.name, 'i');
   if (req.query.phone) filters.phone = new RegExp(req.query.phone, 'i');
   if (req.query.address) filters.address = new RegExp(req.query.address, 'i');
@@ -34,7 +34,7 @@ export const getContacts = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   const { name, phone, address, notes } = req.body;
-  const owner = req.userId;
+  const owner = req.user?.id;
 
   try {
     const newContact = new Contact({ name, phone, address, notes, owner });
@@ -62,7 +62,7 @@ export const updateContact = async (req, res, next) => {
 
     if (!updated) return res.status(404).json({ error: 'Contact not found' });
 
-    res.json(updated);
+    res.status(200).json(updated);
   } catch (err) {
     next(err);
   }

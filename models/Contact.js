@@ -5,7 +5,7 @@ const ContactSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   notes: { type: String },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, onDelete: 'CASCADE' },
 }, { timestamps: true }); 
 
 ContactSchema.index({ owner: 1, name: 1 }, { unique: true });

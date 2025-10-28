@@ -19,9 +19,6 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'email is required' });
     }
 
-    console.log(username, email);
-    console.log(await User.find({}));
-
     const existing = await User.findOne({ username });
     if (existing) return res.status(409).json({ error: 'username already exists' });
     const existingEmail = await User.findOne({ email });
@@ -29,7 +26,6 @@ const register = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashed, email, role: 'user' });
-    console.log(user);
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {

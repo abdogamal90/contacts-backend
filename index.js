@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const contactRoutes = require('./routes/contactRoutes');
-const dotenv = require('dotenv').config();
+require('dotenv').config(); // load env, no unused variable
 const loginRoutes = require('./routes/loginRoutes');
 const userRoutes = require('./routes/userRoutes');
-const {verifyToken, rbac, authToken} = require('./middleware/loginMiddleware');
+const { verifyToken } = require('./middleware/loginMiddleware'); // remove unused rbac/authToken
 const socketIo = require('socket.io');
 const db = require('./db');
 const errorHandler = require('./middleware/errorHandler');
@@ -13,29 +13,15 @@ if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not configured');
 }
 
-
 const app = express();
-db();
-
-// Ensure Contact indexes on startup
-const Contact = require('./models/Contact');
-(async () => {
-  try {
-    await Contact.syncIndexes(); // drops obsolete indexes and creates the defined ones
-    console.log('Contact indexes synced');
-  } catch (e) {
-    console.error('Failed to sync Contact indexes:', e.message);
-    // Optionally: process.exit(1) if you want to fail fast on index errors
-  }
-})();
 
 // Initialize Socket.io
 const server = require('http').createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: '*',
-  },
+  cors: { origin: '*' }, // tighten in production
 });
+app.locals.io = io; // expose io to controllers if needed
+
 const editingContacts = {};
 
 io.on('connection', (socket) => {
@@ -53,7 +39,6 @@ io.on('connection', (socket) => {
     io.emit('editingStatusChanged', { contactId, isEditing: false, username });
   });
 
-
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     for (const [contactId, editor] of Object.entries(editingContacts)) {
@@ -66,8 +51,6 @@ io.on('connection', (socket) => {
   });
 });
 
-
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -77,12 +60,30 @@ app.use('/api/auth', loginRoutes);
 app.use('/api/contacts', verifyToken, contactRoutes);
 app.use('/api/user', verifyToken, userRoutes);
 
+// 404 JSON handler (before error handler)
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'Not Found' });
+});
+
 // Error-handling middleware (must come after routes)
 app.use(errorHandler);
 
-
 // Start the server
-const PORT = process.env.PORT || 8000
-server.listen(PORT, () => {
-  console.log(`localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 8000;
+
+// Ensure DB and indexes are ready before starting the server
+(async () => {
+  try {
+    await db(); // if db() returns a promise; if not, keep as db();
+    const Contact = require('./models/Contact');
+    await Contact.syncIndexes();
+    console.log('Contact indexes synced');
+
+    server.listen(PORT, () => {
+      console.log(`localhost:${PORT}`);
+    });
+  } catch (e) {
+    console.error('Startup failure:', e.message);
+    process.exit(1);
+  }
+})();
