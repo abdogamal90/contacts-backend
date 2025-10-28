@@ -14,6 +14,8 @@ const usernameValidation = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     next();
+  }
+];
 const passwordValidation = [
   body('oldPassword').notEmpty().withMessage('Current password is required'),
   body('newPassword')
@@ -29,9 +31,6 @@ const passwordValidation = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-    next();
-  }
-];
     next();
   }
 ];

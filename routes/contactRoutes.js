@@ -20,9 +20,7 @@ const contactValidation = [
   }
 ];
 
-router.get('/', contactController.getContacts);
-router.post('/', contactValidation, contactController.createContact);
-router.put('/:id', authToken.rbac(['admin']), contactValidation, contactController.updateContact);
-router.delete('/:id', authToken.rbac(['admin']), contactController.deleteContact);
+router.get('/', contactController.getContacts).post('/', contactValidation, contactController.createContact);
+router.put('/:id', authToken.rbac(['admin']), contactValidation, contactController.updateContact).delete('/:id', authToken.rbac(['admin']), contactController.deleteContact);
 
 module.exports = router;
