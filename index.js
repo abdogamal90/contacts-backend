@@ -20,39 +20,18 @@ const server = require('http').createServer(app);
 const io = socketIo(server, {
   cors: { origin: '*' }, // tighten in production
 });
-app.locals.io = io; // expose io to controllers if needed
 
-const editingContacts = {};
+// Move socket handling to a dedicated module
+const initSocket = require('./socketHandler');
+// initialize socket handling (this will set app.locals.io)
+initSocket(io, app);
 
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-
-  socket.on('startEditing', ({ contactId, username }) => {
-    editingContacts[contactId] = { socketId: socket.id, username };
-    io.emit('editingStatusChanged', { contactId, isEditing: true, username });
-  });
-
-  socket.on('stopEditing', ({ contactId }) => {
-    const editor = editingContacts[contactId];
-    const username = editor?.username;
-    delete editingContacts[contactId];
-    io.emit('editingStatusChanged', { contactId, isEditing: false, username });
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-    for (const [contactId, editor] of Object.entries(editingContacts)) {
-      if (editor.socketId === socket.id) {
-        const username = editor.username;
-        delete editingContacts[contactId];
-        io.emit('editingStatusChanged', { contactId, isEditing: false, username });
-      }
-    }
-  });
-});
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:4200'], // add your frontend origin(s)
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes
@@ -74,7 +53,8 @@ const PORT = process.env.PORT || 8000;
 // Ensure DB and indexes are ready before starting the server
 (async () => {
   try {
-    await db(); // if db() returns a promise; if not, keep as db();
+    await db();
+    console.log('MongoDB connected');
     const Contact = require('./models/Contact');
     await Contact.syncIndexes();
     console.log('Contact indexes synced');
