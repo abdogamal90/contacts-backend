@@ -70,9 +70,9 @@ const PORT = process.env.PORT || 8000;
   try {
     await db();
     console.log('MongoDB connected');
-    // const Contact = require('./models/Contact');
-    // await Contact.syncIndexes();
-    // console.log('Contact indexes synced');
+    const Contact = require('./models/Contact');
+    await Contact.syncIndexes();
+    console.log('Contact indexes synced');
 
     server.listen(PORT, () => {
       console.log(`localhost:${PORT}`);
