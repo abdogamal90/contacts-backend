@@ -18,7 +18,7 @@ primary_region = 'iad'
   PORT = "8080"
   API_COMMAND = "npm start"
   MONGO_PORT = "27018"
-  MONGO_URL = "mongodb+srv://abdogamalrahim_db_user:ny08tE7sNlrX12mk@cluster0.qgnf7ct.mongodb.net/?appName=Cluster0"
+  MONGO_URL = "mongodb+srv://abdogamalrahim_db_user:ny08tE7sNlrX12mk@cluster0.qgnf7ct.mongodb.net/contacts_app?retryWrites=true&w=majority"
 
 [http_service]
   internal_port = 8080
