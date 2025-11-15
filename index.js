@@ -28,9 +28,24 @@ initSocket(io, app);
 
 
 // Middleware
+// Read allowed frontend origin(s) from env so production / deploys can set the real origin.
+// Accept a comma-separated list in FRONTEND_ORIGINS, otherwise default to localhost dev origin.
+const frontendOrigins = (process.env.FRONTEND_ORIGINS || 'http://localhost:4200').split(',').map(s => s.trim());
+
 app.use(cors({
-  origin: ['http://localhost:4200'], // add your frontend origin(s)
-  credentials: true
+  origin: function(origin, callback) {
+    // If no origin (e.g. server-to-server, curl), allow it
+    if (!origin) return callback(null, true);
+    if (frontendOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    // not allowed by CORS
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  exposedHeaders: ['Authorization']
 }));
 app.use(express.json());
 
