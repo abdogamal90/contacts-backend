@@ -8,6 +8,22 @@ primary_region = 'iad'
 
 [build]
 
+[env]
+  NODE_ENV = "production"
+  MONGO_URI=mongodb://localhost:27017/contacts_app
+  JWT_SECRET=3d88f@5!zA%TYk79^uP0kj9k#r3
+  NODE_ENV=development
+
+  MONGO_INITDB_ROOT_USERNAME=root
+  MONGO_INITDB_ROOT_PASSWORD=example
+  MONGO_INITDB_DATABASE=contacts_app
+  PORT=3000
+  API_COMMAND=npm start
+  MONGO_PORT=27018
+
+  # Full MongoDB URL (for reference)
+  MONGO_URL=mongodb://root:example@mongo:27017/contacts_app?authSource=admin
+
 [http_service]
   internal_port = 3000
   force_https = true
