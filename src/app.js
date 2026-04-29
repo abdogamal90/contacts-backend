@@ -9,6 +9,11 @@ const { corsOrigins } = require('./config');
 
 const app = express();
 
+// No auth / CORS — use for load balancers and `curl http://IP:PORT/health`
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use(
   cors({
     origin(origin, callback) {
