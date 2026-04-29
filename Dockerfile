@@ -1,4 +1,8 @@
 # Production Dockerfile - Multi-stage build for optimized image
+#
+# Runtime secrets (JWT_SECRET, MONGO_URL, etc.) must come from your host (e.g. Railway
+# service Variables). They are injected when the container starts — not from .env
+# (see .dockerignore). After changing variables on Railway, apply/save and redeploy.
 FROM node:20-alpine AS builder
 
 # Set the working directory inside the container

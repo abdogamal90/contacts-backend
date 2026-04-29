@@ -1,14 +1,22 @@
 function loadConfig() {
   const jwtSecret = (process.env.JWT_SECRET || '').trim();
-  const mongoUrl = (process.env.MONGO_URL || '').trim();
+  // Railway / Atlas templates sometimes use DATABASE_URL or MONGODB_URI instead of MONGO_URL
+  const mongoUrl = (
+    process.env.MONGO_URL ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL ||
+    ''
+  ).trim();
   const missing = [];
   if (!jwtSecret) missing.push('JWT_SECRET');
-  if (!mongoUrl) missing.push('MONGO_URL');
+  if (!mongoUrl) {
+    missing.push('MONGO_URL (or MONGODB_URI / DATABASE_URL)');
+  }
   if (missing.length) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}. ` +
-        'Set them on the Railway service that runs this app (Variables), then redeploy. ' +
-        'If you use a Dockerfile, variables are injected at run time — they are not read from .env in the image.'
+        'In Railway: open the service that runs this Docker image → Variables → add them → click Apply / save, then Redeploy. ' +
+        'Purple or pending rows are not live until applied. This image does not include .env.'
     );
   }
 
