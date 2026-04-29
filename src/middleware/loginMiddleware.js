@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config');
 
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization || '';
@@ -7,7 +8,7 @@ function verifyToken(req, res, next) {
   if (!token) return res.status(401).json({ error: 'No token provided' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
 
     // Preferred unified shape
     req.user = {

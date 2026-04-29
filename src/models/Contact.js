@@ -42,7 +42,7 @@ const ContactSchema = new mongoose.Schema({
 
   isFavorite: { type: Boolean, default: false }
 
-}, { timestamps: true }); 
+}, { timestamps: true });
 
 // Ensure tags are stored lowercase & trimmed
 ContactSchema.path('tags').set(function (tags) {
