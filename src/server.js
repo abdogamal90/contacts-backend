@@ -23,9 +23,8 @@ initSocket(io, app);
     await Contact.syncIndexes();
     console.log('Contact indexes synced');
 
-    server.listen(config.port, () => {
-      console.log(`Listening on port ${config.port}`);
-      console.log(`Server is running on http://localhost:${config.port}`);
+    server.listen(config.port, '0.0.0.0', () => {
+      console.log(`Listening on 0.0.0.0:${config.port} (reachable from outside this machine)`);
     });
   } catch (e) {
     console.error('Startup failure:', e.message);
