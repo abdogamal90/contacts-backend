@@ -117,6 +117,26 @@ const getContacts = async (req, res, next) => {
   }
 };
 
+const getContactById = async (req, res, next) => {
+  try {
+    const isAdmin = req.user?.role === 'admin';
+    const criteria = isAdmin
+      ? { _id: req.params.id }
+      : { _id: req.params.id, owner: req.user.id };
+    const contact = await Contact.findOne(criteria).lean();
+
+    if (!contact) return res.status(404).json({ error: 'Contact not found' });
+
+    return res.status(200).json({
+      ...contact,
+      _id: contact._id.toString(),
+      owner: contact.owner?.toString?.() ?? contact.owner,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * GET /contacts/favorites
  * Returns favorite contacts for the logged-in user (supports pagination & sorting via same query params)
@@ -273,6 +293,7 @@ const deleteContact = async (req, res, next) => {
 
 module.exports = {
   getContacts,
+  getContactById,
   getFavorites,
   toggleFavorite,
   getTags,

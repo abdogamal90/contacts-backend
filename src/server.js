@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const http = require('http');
 const socketIo = require('socket.io');
+const jwt = require('jsonwebtoken');
 const config = require('./config');
 const app = require('./app');
 const connectDB = require('./db');
@@ -11,7 +12,19 @@ const Contact = require('./models/Contact');
 
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: { origin: '*' },
+  cors: { origin: config.corsOrigins },
+});
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('Authentication required'));
+
+  try {
+    socket.user = jwt.verify(token, config.jwtSecret);
+    return next();
+  } catch (_error) {
+    return next(new Error('Invalid or expired token'));
+  }
 });
 
 initSocket(io, app);

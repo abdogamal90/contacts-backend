@@ -8,7 +8,8 @@ module.exports = function initSocket(io, app) {
   io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
-    socket.on('startEditing', ({ contactId, username }) => {
+    socket.on('startEditing', ({ contactId }) => {
+      const username = socket.user.username;
       editingContacts[contactId] = { socketId: socket.id, username };
       io.emit('editingStatusChanged', { contactId, isEditing: true, username });
     });

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const contactController = require('../controllers/contactController');
-const { verifyToken } = require('../middleware/loginMiddleware');
 const { body, validationResult, query } = require('express-validator');
 
 // Validation middleware for create/update
@@ -53,25 +52,27 @@ const filterQueryValidation = [
 
 // Routes
 // Enhanced GET /contacts supports search, tags, category, isFavorite, sorting, pagination
-router.get('/', verifyToken, filterQueryValidation, contactController.getContacts);
+router.get('/', filterQueryValidation, contactController.getContacts);
 
 // Favorites
-router.get('/favorites', verifyToken, contactController.getFavorites);
-router.patch('/:id/favorite', verifyToken, contactController.toggleFavorite);
+router.get('/favorites', contactController.getFavorites);
+router.patch('/:id/favorite', contactController.toggleFavorite);
 
 // Tags
-router.get('/tags', verifyToken, contactController.getTags);
-router.patch('/:id/tags', verifyToken, tagUpdateValidation, contactController.updateTags);
+router.get('/tags', contactController.getTags);
+router.patch('/:id/tags', tagUpdateValidation, contactController.updateTags);
 
 // Categories
-router.get('/categories/:category', verifyToken, contactController.getByCategory);
+router.get('/categories/:category', contactController.getByCategory);
 
 // Advanced filter alias (optional)
-router.get('/filter', verifyToken, filterQueryValidation, contactController.getContacts);
+router.get('/filter', filterQueryValidation, contactController.getContacts);
+
+router.get('/:id', contactController.getContactById);
 
 // Standard CRUD (create/update/delete) with new validation
-router.post('/', verifyToken, contactValidation, contactController.createContact);
-router.put('/:id', verifyToken, contactValidation, contactController.updateContact);
-router.delete('/:id', verifyToken, contactController.deleteContact);
+router.post('/', contactValidation, contactController.createContact);
+router.put('/:id', contactValidation, contactController.updateContact);
+router.delete('/:id', contactController.deleteContact);
 
 module.exports = router;
